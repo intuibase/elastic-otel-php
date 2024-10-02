@@ -22,7 +22,7 @@
 #include "AutoZval.h"
 #include "PhpBridge.h"
 
-
+#define SNPRINTF_H
 #include <main/php.h>
 #include <Zend/zend_API.h>
 

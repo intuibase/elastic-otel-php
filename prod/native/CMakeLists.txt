@@ -99,7 +99,7 @@ set(dependencies
     "zlib/1.3"
     "libcurl/8.0.1"
     "libunwind/1.6.2"
-    "boost/1.82.0"
+    "boost/1.86.0"
     "gtest/1.13.0"
 )
 
@@ -114,7 +114,10 @@ endforeach()
 
 conan_cmake_run(REQUIRES ${dependencies}
                 OPTIONS Pkg/*:shared=False
-                        boost:header_only=True
+                        b2/*:use_cxx_env=True
+                        b2/*:toolset=cxx
+                        boost:without_stacktrace=True
+                        boost:header_only=False
                         libcurl:shared=True
                         libcurl:with_libssh2=True
                 BUILD missing

@@ -19,6 +19,7 @@
 
 #pragma once
 
+#define SNPRINTF_H
 #include <main/php.h>
 #include <Zend/zend.h>
 #include <Zend/zend_API.h>

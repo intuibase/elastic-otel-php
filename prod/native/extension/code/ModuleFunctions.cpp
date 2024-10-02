@@ -27,6 +27,7 @@
 #include "InternalFunctionInstrumentation.h"
 #include "transport/HttpTransportAsync.h"
 
+#define SNPRINTF_H
 #include <main/php.h>
 #include <Zend/zend_API.h>
 #include <Zend/zend_closures.h>

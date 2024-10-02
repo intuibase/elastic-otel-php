@@ -14,7 +14,7 @@ add_executable(${targetName} ${SrcFiles})
 target_link_libraries(${targetName}
     PRIVATE ${testLib}
     PRIVATE CONAN_PKG::libcurl
-   CONAN_PKG::gtest)
+    PRIVATE CONAN_PKG::gtest)
 
 
 target_include_directories(${targetName}

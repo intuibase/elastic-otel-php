@@ -35,7 +35,19 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+
+#if defined(BOOST_GCC) && BOOST_GCC >= 40600
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
 #include <boost/container_hash/hash.hpp>
+#include <boost/url.hpp>
+
+#if defined(BOOST_GCC) && BOOST_GCC >= 40600
+#pragma GCC diagnostic pop
+#endif
+
 #include <curl/curl.h>
 
 using namespace std::literals;
@@ -57,13 +69,33 @@ public:
     }
 
     HttpEndpoint(std::string endpoint, std::string_view contentType, enpointHeaders_t const &headers, std::size_t maxRetries, std::chrono::milliseconds retryDelay) : endpoint_(std::move(endpoint)), maxRetries_(maxRetries), retryDelay_(retryDelay) {
-        auto connectionDetails = utils::getConnectionDetailsFromURL(endpoint_);
-        if (!connectionDetails) {
-            std::string msg = "Unable to parse connection details from endpoint: "s;
+        // auto connectionDetails = utils::getConnectionDetailsFromURL(endpoint_);
+        // if (!connectionDetails) {
+        //     std::string msg = "Unable to parse connection details from endpoint: "s;
+        //     msg.append(endpoint_);
+        //     throw std::runtime_error(msg);
+        // }
+
+        boost::url_view url(endpoint_);
+        std::string connectionDetails = url.scheme();
+        if (url.scheme_id() != boost::urls::scheme::http && url.scheme_id() != boost::urls::scheme::https) {
+            std::string msg = "URL scheme not supported in endpoint URL: "s;
             msg.append(endpoint_);
             throw std::runtime_error(msg);
         }
-        connectionId_ = std::hash<std::string>{}(connectionDetails.value());
+        //         url_view u( "https://user:pass@example.com:443/path/to/my%2dfile.txt?id=42&name=John%20Doe+Jingleheimer%2DSchmidt#page%20anchor" );
+        // assert(u.scheme() == "https");
+        // assert(u.authority().buffer() == "user:pass@example.com:443");
+        // assert(u.userinfo() == "user:pass");
+        // assert(u.user() == "user");
+        // assert(u.password() == "pass");
+        // assert(u.host() == "example.com");
+        // assert(u.port() == "443");
+        // assert(u.path() == "/path/to/my-file.txt");
+        // assert(u.query() == "id=42&name=John Doe Jingleheimer-Schmidt");
+        // assert(u.fragment() == "page anchor");
+
+        connectionId_ = std::hash<std::string>{}(url.authority().buffer());
 
         fillCurlHeaders(contentType, headers);
     }

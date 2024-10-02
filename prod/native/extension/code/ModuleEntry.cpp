@@ -24,6 +24,8 @@
 
 #include "ModuleGlobals.h"
 // external libraries
+
+#define SNPRINTF_H
 #include <main/php.h>
 #include <Zend/zend_types.h>
 

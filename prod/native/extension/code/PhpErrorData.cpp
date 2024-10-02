@@ -20,6 +20,7 @@
 
 #include "PhpErrorData.h"
 
+#define SNPRINTF_H
 #include <main/php.h>
 #include <Zend/zend_alloc.h>
 #include <Zend/zend_builtin_functions.h>

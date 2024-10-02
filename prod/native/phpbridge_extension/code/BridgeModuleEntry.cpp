@@ -25,7 +25,7 @@
 
 #include "elastic_otel_version.h"
 
-
+#define SNPRINTF_H
 #include <main/php.h>
 #include <Zend/zend_types.h>
 

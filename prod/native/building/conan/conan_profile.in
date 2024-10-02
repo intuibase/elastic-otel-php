@@ -15,3 +15,4 @@ compiler.libcxx=libstdc++11
 CC=@_PRV_CONAN_PROFILE_CC@
 CXX=@_PRV_CONAN_PROFILE_CXX@
 LDFLAGS="-static-libgcc -static-libstdc++"
+b2/*:CXXFLAGS="-static-libgcc -static-libstdc++ -pthread -ldl -Wl,-Bsymbolic -Wl,--exclude-libs,ALL"
