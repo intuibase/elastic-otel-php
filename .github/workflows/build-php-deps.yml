@@ -20,17 +20,21 @@ jobs:
       COMPOSER_ALLOW_SUPERUSER: 1
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
       - name: Build PHP dependencies
         run: |
-          source ./tools/read_properties.sh
-          read_properties elastic-otel-php.properties PROJECT_PROPERTIES
+          source ./upstream/tools/read_properties.sh
+          read_properties upstream/project.properties PROJECT_PROPERTIES
           PHP_VERSIONS=${PROJECT_PROPERTIES_SUPPORTED_PHP_VERSIONS//[()]/}
           ./tools/build/build_php_deps.sh --php_versions "${PHP_VERSIONS}"
       - uses: actions/upload-artifact@v7
         with:
           name: php-dependencies
           path: |
-            prod/php/vendor_*
-            prod/php/ElasticOTel/PhpPartVersion.php
-            prod/php/ElasticOTel/Log/LogFeature.php
+            elastic_prod/php/Elastic/OTel/ElasticVendorCustomizations.php
+            upstream/prod/php/vendor_*
+            upstream/prod/php/OpenTelemetry/Distro/PhpPartVersion.php
+            upstream/prod/php/OpenTelemetry/Distro/Log/LogFeature.php
+            upstream/prod/php/ScoperConfig.php
             NOTICE
