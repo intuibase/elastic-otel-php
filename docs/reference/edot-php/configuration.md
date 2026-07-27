@@ -59,6 +59,15 @@ If you change the exporter or the transport protocol, for example to gRPC or ano
 EDOT PHP also sets the `OTEL_PHP_AUTOLOAD_ENABLED` option to `true` by default. This turns on automatic instrumentation without requiring any changes to your application code.
 Modifying this option will have no effect: EDOT will override it and enforce it as `true`.
 
+### EDOT PHP default overrides
+
+Some OpenTelemetry SDK options have different default values in EDOT PHP. You can still override these by setting the environment variable explicitly.
+
+| Environment variable | OTel SDK default | OTel PHP Distro default | EDOT PHP default | Notes |
+|---|---|---|---|---|
+| `OTEL_PHP_AUTOLOAD_ENABLED` | `false` | `true` (enforced) | `true` (enforced) | Cannot be overridden; EDOT always enables autoloading. |
+| `OTEL_PHP_INTERNAL_METRICS_ENABLED` | `false` | `false` | `true` | Enables SDK health metrics (spans exported, queue size, and so on). Set to `false` to turn off. Not applicable when `OTEL_CONFIG_FILE` is used. |
+
 EDOT PHP bundles multiple dependencies, such as the OpenTelemetry SDK, auto-instrumentations, and their transitive dependencies. This means that your application might include dependencies that clash with the bundled ones, which can cause it to malfunction. To prevent this, EDOT PHP uses scoped dependencies by default: a unique prefix is added to all bundled namespaces. Because PHP supports runtime reflection, this namespace change might be incompatible with some edge cases. To fall back to the original (unscoped) dependencies, set `OTEL_PHP_SCOPED_DEPS_ENABLED` (php.ini: `opentelemetry_distro.scoped_deps_enabled`) to `false`. Refer to [Supportability](#supportability) for more information.
 
 ## EDOT PHP-specific configuration options
@@ -162,7 +171,10 @@ _Deprecated alias: `ELASTIC_OTEL_ATTR_HOOKS_ENABLED`_
 
 ### Scoped dependencies bridge
 
-{applies_to}`edot_php: ga 1.8.0`
+```{applies_to}
+product:
+  edot_php: ga 1.8.0
+```
 
 | Option(s)                           | Default | Accepted values   | Description                                                                                                                                                                                                                                                                       |
 | ----------------------------------- | ------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -242,15 +254,18 @@ _Deprecated alias: `ELASTIC_OTEL_SCOPED_DEPS_ENABLED`_
 
 ### Scoped dependencies bridge interop
 
-{applies_to}`edot_php: ga 1.8.0`
+```{applies_to}
+product:
+  edot_php: ga 1.8.0
+```
 
-By default EDOT PHP's OpenTelemetry runtime is **scoped** (see [Special considerations](#special-considerations)): its classes live under a unique namespace prefix, separate from the standard `OpenTelemetry\*` classes an application installs via Composer. As a result, the application's own OpenTelemetry usage — instrumentation it writes itself, or officially published auto-instrumentation packages it installs (for example `open-telemetry/opentelemetry-auto-pdo`), using the public `OpenTelemetry\API\*` / `OpenTelemetry\Context\*` / `OpenTelemetry\SDK\*` API and the `OpenTelemetry\Instrumentation\hook()` function — runs against a **separate** runtime: its spans use a no-op tracer provider and an empty context, so EDOT PHP does not export them or connect them to its own traces.
+By default, EDOT PHP's OpenTelemetry runtime is **scoped** (refer to [Special considerations](#special-considerations)): its classes live under a unique namespace prefix, separate from the standard `OpenTelemetry\*` classes an application installs via Composer. As a result, the application's own OpenTelemetry usage — instrumentation it writes itself, or officially published auto-instrumentation packages it installs (for example, `open-telemetry/opentelemetry-auto-pdo`), using the public `OpenTelemetry\API\*` / `OpenTelemetry\Context\*` / `OpenTelemetry\SDK\*` API and the `OpenTelemetry\Instrumentation\hook()` function — runs against a **separate** runtime. Its spans use a no-op tracer provider and an empty context, so EDOT PHP does not export them or connect them to its own traces.
 
 Setting `OTEL_PHP_SCOPED_DEPS_BRIDGE_ENABLED=true` bridges the two: before the application's Composer autoloader runs, EDOT PHP registers class aliases that map the unscoped `OpenTelemetry\*` API onto its scoped implementation. The application's own OpenTelemetry usage then transparently uses EDOT PHP's tracer provider and context, and its spans are exported and correctly parented within EDOT PHP's traces.
 
 Because EDOT PHP ships specific versions of the OpenTelemetry packages, EDOT PHP checks at shutdown whether the application installed different versions of `open-telemetry/api`, `open-telemetry/context`, or `open-telemetry/sdk`, and logs a warning for each mismatch. The version that EDOT PHP bundles is always the one active at runtime. If the versions differ significantly, the shared runtime might behave unexpectedly. Align the application's versions with the versions bundled in EDOT PHP to prevent this.
 
-This option has no effect when scoping is turned off (`OTEL_PHP_SCOPED_DEPS_ENABLED=false`): without scoping EDOT PHP already uses the unscoped `OpenTelemetry\*` classes that the application uses, so OpenTelemetry usage shares the runtime without bridging.
+This option has no effect when scoping is turned off (`OTEL_PHP_SCOPED_DEPS_ENABLED=false`). Without scoping, EDOT PHP already uses the unscoped `OpenTelemetry\*` classes that the application uses, so OpenTelemetry usage shares the runtime without bridging.
 
 ## File-based configuration (declarative)
 
